@@ -1,0 +1,166 @@
+diff --git a/at91sam9260ek.dts.orig b/at91sam9260ek.dts
+index ce96345..3d30371 100644
+--- a/arch/arm/boot/dts/at91sam9260ek.dts
++++ b/arch/arm/boot/dts/at91sam9260ek.dts
+@@ -46,33 +46,35 @@
+ 			};
+ 
+ 			usb1: gadget@fffa4000 {
+-				atmel,vbus-gpio = <&pioC 5 GPIO_ACTIVE_HIGH>;
++				/* atmel,vbus-gpio = <&pioC 5 GPIO_ACTIVE_HIGH>; */
++				atmel,vbus-gpio = <&pioB 16 GPIO_ACTIVE_HIGH>;
+ 				status = "okay";
+ 			};
+ 
+ 			mmc0: mmc@fffa8000 {
+ 				pinctrl-0 = <
+-					&pinctrl_board_mmc0_slot1
++					&pinctrl_board_mmc0_slot0
+ 					&pinctrl_mmc0_clk
+-					&pinctrl_mmc0_slot1_cmd_dat0
+-					&pinctrl_mmc0_slot1_dat1_3>;
++					&pinctrl_mmc0_slot0_cmd_dat0
++					&pinctrl_mmc0_slot0_dat1_3>;
+ 				pinctrl-names = "default";
+ 				status = "okay";
+ 				slot@1 {
+-					reg = <1>;
++					reg = <0>;
+ 					bus-width = <4>;
+-					cd-gpios = <&pioC 9 GPIO_ACTIVE_HIGH>;
++					cd-gpios = <&pioA 5 GPIO_ACTIVE_HIGH>;
+ 				};
+ 			};
+ 
+ 			usart0: serial@fffb0000 {
+ 				pinctrl-0 =
+ 					<&pinctrl_usart0
+-					 &pinctrl_usart0_rts
++					/* &pinctrl_usart0_rts
+ 					 &pinctrl_usart0_cts
+ 					 &pinctrl_usart0_dtr_dsr
+ 					 &pinctrl_usart0_dcd
+-					 &pinctrl_usart0_ri>;
++					 &pinctrl_usart0_ri */
++					>;
+ 				status = "okay";
+ 			};
+ 
+@@ -81,7 +83,7 @@
+ 			};
+ 
+ 			ssc0: ssc@fffbc000 {
+-				status = "okay";
++			 /* status = "okay"; */
+ 				pinctrl-0 = <&pinctrl_ssc0_tx>;
+ 			};
+ 
+@@ -91,23 +93,40 @@
+ 			};
+ 
+ 			spi0: spi@fffc8000 {
+-				cs-gpios = <0>, <&pioC 11 0>, <0>, <0>;
+-				mtd_dataflash@1 {
++				/* cs-gpios = <0>, <&pioC 11 0>, <0>, <0>; */
++				/* cs-gpios = <0>, <&pioA 3 0>, <0>, <0>; */
++				cs-gpios = <&pioA 3 0>, <0>, <0>, <0>;
++				status = "okay";
++				mtd_dataflash@0 {
+ 					compatible = "atmel,at45", "atmel,dataflash";
+ 					spi-max-frequency = <50000000>;
+-					reg = <1>;
++					reg = <0>;
+ 				};
+ 			};
+ 
++			spi1: spi@fffcc000 {
++				cs-gpio = <&pioB 3 0>,<&pioC 5 0>,<&pioC 4 0>;
++				status = "okay";
++
++				spidev0: spidev@0{
++                	 	compatible = "spidev";
++                		reg = <0>;      /* CE0 */
++		                #address-cells = <1>;
++                 		#size-cells = <0>;
++                 		spi-max-frequency = <500000>;
++        			 };
++			};  
++
+ 			dbgu: serial@fffff200 {
+ 				status = "okay";
+ 			};
+ 
+ 			pinctrl@fffff400 {
+ 				board {
+-					pinctrl_board_mmc0_slot1: mmc0_slot1-board {
++					pinctrl_board_mmc0_slot0: mmc0_slot0-board {
+ 						atmel,pins =
+-							<AT91_PIOC 9 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP_DEGLITCH>;
++						/*	<AT91_PIOC 9 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP_DEGLITCH>;	*/
++							<AT91_PIOA 5 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP_DEGLITCH>;
+ 					};
+ 				};
+ 			};
+@@ -147,17 +166,17 @@
+ 	gpio_keys {
+ 		compatible = "gpio-keys";
+ 
+-		btn3 {
+-			label = "Button 3";
+-			gpios = <&pioA 30 GPIO_ACTIVE_LOW>;
++		btn0 {
++			label = "Button 0";
++			gpios = <&pioB 24 GPIO_ACTIVE_LOW>;
+ 			linux,code = <0x103>;
+ 			wakeup-source;
+ 		};
+ 
+-		btn4 {
+-			label = "Button 4";
+-			gpios = <&pioA 31 GPIO_ACTIVE_LOW>;
+-			linux,code = <KEY_PROG1>;
++		btn1 {
++			label = "Button 1";
++			gpios = <&pioB 23 GPIO_ACTIVE_LOW>;
++			linux,code = <0x104>;
+ 			wakeup-source;
+ 		};
+ 	};
+@@ -171,18 +190,33 @@
+ 		};
+ 	};
+ 
++    i2c-gpio-1 {
++		status = "okay";
++	};
+ 	leds {
+ 		compatible = "gpio-leds";
+ 
+ 		ds1 {
+ 			label = "ds1";
+-			gpios = <&pioA 9 GPIO_ACTIVE_HIGH>;
++			gpios = <&pioB 28 GPIO_ACTIVE_LOW>;
+ 			linux,default-trigger = "heartbeat";
+ 		};
+ 
+-		ds5 {
+-			label = "ds5";
+-			gpios = <&pioA 6 GPIO_ACTIVE_LOW>;
++		ds2 {
++			label = "ds2";
++			gpios = <&pioB 27 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "cpu0";
++		};
++		ds3 {
++			label = "ds3";
++			gpios = <&pioB 26 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "mtd";
++		};
++	
++		ds4 {
++			label = "ds4";
++			gpios = <&pioB 25 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "fffc4000.etherne:01:100Mbps";
+ 		};
+ 	};
+ };

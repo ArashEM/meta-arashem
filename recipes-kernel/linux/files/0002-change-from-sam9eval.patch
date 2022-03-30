@@ -1,0 +1,66 @@
+diff --git a/at91sam9260.dtsi.orig b/at91sam9260.dtsi
+index 7368347..542835b 100644
+--- a/arch/arm/boot/dts/at91sam9260.dtsi
++++ b/arch/arm/boot/dts/at91sam9260.dtsi
+@@ -414,11 +414,21 @@
+ 				i2c_gpio0 {
+ 					pinctrl_i2c_gpio0: i2c_gpio0-0 {
+ 						atmel,pins =
+-							<AT91_PIOA 23 AT91_PERIPH_GPIO AT91_PINCTRL_MULTI_DRIVE
+-							 AT91_PIOA 24 AT91_PERIPH_GPIO AT91_PINCTRL_MULTI_DRIVE>;
++						/*	<AT91_PIOA 23 AT91_PERIPH_GPIO AT91_PINCTRL_MULTI_DRIVE
++							 AT91_PIOA 24 AT91_PERIPH_GPIO AT91_PINCTRL_MULTI_DRIVE>; */
++							<AT91_PIOB 20 AT91_PERIPH_GPIO AT91_PINCTRL_MULTI_DRIVE
++							 AT91_PIOB 21 AT91_PERIPH_GPIO AT91_PINCTRL_MULTI_DRIVE>;
+ 					};
+ 				};
+ 
++
++				i2c_gpio1 {
++					pinctrl_i2c_gpio1: i2c_gpio1-0 {
++						atmel,pins =
++							<AT91_PIOA 23 AT91_PERIPH_GPIO (AT91_PINCTRL_MULTI_DRIVE | AT91_PINCTRL_PULL_UP)
++							 AT91_PIOA 24 AT91_PERIPH_GPIO (AT91_PINCTRL_MULTI_DRIVE | AT91_PINCTRL_PULL_UP)>;
++					};
++				};
+ 				tcb0 {
+ 					pinctrl_tcb0_tclk0: tcb0_tclk0-0 {
+ 						atmel,pins = <AT91_PIOA 25 AT91_PERIPH_A AT91_PINCTRL_NONE>;
+@@ -771,7 +781,27 @@
+ 		};
+ 	};
+ 
+-	i2c_gpio0: i2c-gpio-0 {
++	i2c-gpio-0 {
++		compatible = "i2c-gpio";
++		/* gpios = <&pioA 23 GPIO_ACTIVE_HIGH /* sda */
++		/*	 &pioA 24 GPIO_ACTIVE_HIGH /* scl */
++		/*	>; */
++		gpios = <&pioB 20 GPIO_ACTIVE_HIGH /* sda */
++			 &pioB 21 GPIO_ACTIVE_HIGH /* scl */
++			>;
++		i2c-gpio,sda-open-drain;
++		i2c-gpio,scl-open-drain;
++		i2c-gpio,delay-us = <2>;	/* ~100 kHz */
++		#address-cells = <1>;
++		#size-cells = <0>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_i2c_gpio0>;
++		status = "disabled";
++	 
++	
++	};
++
++	i2c-gpio-1 {
+ 		compatible = "i2c-gpio";
+ 		gpios = <&pioA 23 GPIO_ACTIVE_HIGH /* sda */
+ 			 &pioA 24 GPIO_ACTIVE_HIGH /* scl */
+@@ -782,7 +812,7 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_i2c_gpio0>;
++		pinctrl-0 = <&pinctrl_i2c_gpio1>;
+ 		status = "disabled";
+ 	};
+ };
