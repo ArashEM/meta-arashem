@@ -1,13 +1,24 @@
 diff --git a/at91sam9260ek.dts.orig b/at91sam9260ek.dts
-index ce96345..3d30371 100644
+index ce96345..ff022e2 100644
 --- a/arch/arm/boot/dts/at91sam9260ek.dts
 +++ b/arch/arm/boot/dts/at91sam9260ek.dts
-@@ -46,33 +46,35 @@
+@@ -31,6 +31,11 @@
+ 		};
+ 	};
+ 
++	backlight: backlight {
++            compatible = "gpio-backlight";
++            gpios = <&pioA 26 GPIO_ACTIVE_HIGH>;
++    };
++
+ 	ahb {
+ 		apb {
+ 			tcb0: timer@fffa0000 {
+@@ -46,33 +51,28 @@
  			};
  
  			usb1: gadget@fffa4000 {
 -				atmel,vbus-gpio = <&pioC 5 GPIO_ACTIVE_HIGH>;
-+				/* atmel,vbus-gpio = <&pioC 5 GPIO_ACTIVE_HIGH>; */
 +				atmel,vbus-gpio = <&pioB 16 GPIO_ACTIVE_HIGH>;
  				status = "okay";
  			};
@@ -23,8 +34,9 @@ index ce96345..3d30371 100644
 +					&pinctrl_mmc0_slot0_dat1_3>;
  				pinctrl-names = "default";
  				status = "okay";
- 				slot@1 {
+-				slot@1 {
 -					reg = <1>;
++				slot@0 {
 +					reg = <0>;
  					bus-width = <4>;
 -					cd-gpios = <&pioC 9 GPIO_ACTIVE_HIGH>;
@@ -34,37 +46,34 @@ index ce96345..3d30371 100644
  
  			usart0: serial@fffb0000 {
  				pinctrl-0 =
- 					<&pinctrl_usart0
+-					<&pinctrl_usart0
 -					 &pinctrl_usart0_rts
-+					/* &pinctrl_usart0_rts
- 					 &pinctrl_usart0_cts
- 					 &pinctrl_usart0_dtr_dsr
- 					 &pinctrl_usart0_dcd
+-					 &pinctrl_usart0_cts
+-					 &pinctrl_usart0_dtr_dsr
+-					 &pinctrl_usart0_dcd
 -					 &pinctrl_usart0_ri>;
-+					 &pinctrl_usart0_ri */
-+					>;
++					<&pinctrl_usart0>;
  				status = "okay";
  			};
  
-@@ -81,7 +83,7 @@
+@@ -81,7 +81,7 @@
  			};
  
  			ssc0: ssc@fffbc000 {
 -				status = "okay";
-+			 /* status = "okay"; */
++				//status = "okay";
  				pinctrl-0 = <&pinctrl_ssc0_tx>;
  			};
  
-@@ -91,23 +93,40 @@
+@@ -91,23 +91,40 @@
  			};
  
  			spi0: spi@fffc8000 {
 -				cs-gpios = <0>, <&pioC 11 0>, <0>, <0>;
 -				mtd_dataflash@1 {
-+				/* cs-gpios = <0>, <&pioC 11 0>, <0>, <0>; */
-+				/* cs-gpios = <0>, <&pioA 3 0>, <0>, <0>; */
 +				cs-gpios = <&pioA 3 0>, <0>, <0>, <0>;
 +				status = "okay";
++				
 +				mtd_dataflash@0 {
  					compatible = "atmel,at45", "atmel,dataflash";
  					spi-max-frequency = <50000000>;
@@ -77,14 +86,16 @@ index ce96345..3d30371 100644
 +				cs-gpio = <&pioB 3 0>,<&pioC 5 0>,<&pioC 4 0>;
 +				status = "okay";
 +
-+				spidev0: spidev@0{
-+                	 	compatible = "spidev";
-+                		reg = <0>;      /* CE0 */
-+		                #address-cells = <1>;
-+                 		#size-cells = <0>;
-+                 		spi-max-frequency = <500000>;
-+        			 };
-+			};  
++				display@0{
++					compatible = "adafruit,yx240qv29", "ilitek,ili9341";
++					reg = <0>;
++					spi-max-frequency = <32000000>;
++					dc-gpios = <&pioA 29 GPIO_ACTIVE_HIGH>;
++					reset-gpios = <&pioA 28 GPIO_ACTIVE_HIGH>;
++					rotation = <270>;
++					backlight = <&backlight>;
++				};
++			};		
 +
  			dbgu: serial@fffff200 {
  				status = "okay";
@@ -96,12 +107,40 @@ index ce96345..3d30371 100644
 +					pinctrl_board_mmc0_slot0: mmc0_slot0-board {
  						atmel,pins =
 -							<AT91_PIOC 9 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP_DEGLITCH>;
-+						/*	<AT91_PIOC 9 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP_DEGLITCH>;	*/
 +							<AT91_PIOA 5 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP_DEGLITCH>;
  					};
  				};
  			};
-@@ -147,17 +166,17 @@
+@@ -136,53 +153,70 @@
+ 			status = "okay";
+ 		};
+ 
+-		nand0: nand@40000000 {
+-			nand-bus-width = <8>;
+-			nand-ecc-mode = "soft";
+-			nand-on-flash-bbt;
++		ebi: ebi@10000000 {
+ 			status = "okay";
++
++			nand_controller: nand-controller {
++				status = "okay";
++				pinctrl-0 = <&pinctrl_nand_cs &pinctrl_nand_rb>;
++				pinctrl-names = "default";
++
++				nand@3 {
++					status = "okay";
++					reg = <0x3 0x0 0x800000>;
++					rb-gpios = <&pioC 13 GPIO_ACTIVE_HIGH>;
++					cs-gpios = <&pioC 14 GPIO_ACTIVE_HIGH>;
++					nand-bus-width = <8>;
++					nand-ecc-mode = "soft";
++					nand-on-flash-bbt;
++					label = "atmel_nand";
++				};
++			};
+ 		};
+ 	};
+ 
  	gpio_keys {
  		compatible = "gpio-keys";
  
@@ -126,13 +165,16 @@ index ce96345..3d30371 100644
  			wakeup-source;
  		};
  	};
-@@ -171,18 +190,33 @@
- 		};
- 	};
  
-+    i2c-gpio-1 {
-+		status = "okay";
-+	};
+-	i2c-gpio-0 {
+-		status = "okay";
+-
+-		24c512@50 {
+-			compatible = "atmel,24c512";
+-			reg = <0x50>;
+-		};
+-	};
+-
  	leds {
  		compatible = "gpio-leds";
  
