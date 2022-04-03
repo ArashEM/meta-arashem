@@ -1,20 +1,8 @@
-diff --git a/at91sam9260ek.dts.orig b/at91sam9260ek.dts
-index ce96345..ff022e2 100644
+diff --git a/at91sam9260ek.dts.orig b/at91sam9260ek.dts.working
+index ce96345..e28bd56 100644
 --- a/arch/arm/boot/dts/at91sam9260ek.dts
 +++ b/arch/arm/boot/dts/at91sam9260ek.dts
-@@ -31,6 +31,11 @@
- 		};
- 	};
- 
-+	backlight: backlight {
-+            compatible = "gpio-backlight";
-+            gpios = <&pioA 26 GPIO_ACTIVE_HIGH>;
-+    };
-+
- 	ahb {
- 		apb {
- 			tcb0: timer@fffa0000 {
-@@ -46,33 +51,28 @@
+@@ -46,33 +46,28 @@
  			};
  
  			usb1: gadget@fffa4000 {
@@ -56,7 +44,7 @@ index ce96345..ff022e2 100644
  				status = "okay";
  			};
  
-@@ -81,7 +81,7 @@
+@@ -81,7 +76,7 @@
  			};
  
  			ssc0: ssc@fffbc000 {
@@ -65,13 +53,13 @@ index ce96345..ff022e2 100644
  				pinctrl-0 = <&pinctrl_ssc0_tx>;
  			};
  
-@@ -91,23 +91,40 @@
+@@ -91,11 +86,13 @@
  			};
  
  			spi0: spi@fffc8000 {
 -				cs-gpios = <0>, <&pioC 11 0>, <0>, <0>;
 -				mtd_dataflash@1 {
-+				cs-gpios = <&pioA 3 0>, <0>, <0>, <0>;
++				//cs-gpios = <&pioA 3 0>, <0>, <0>, <0>;
 +				status = "okay";
 +				
 +				mtd_dataflash@0 {
@@ -82,24 +70,7 @@ index ce96345..ff022e2 100644
  				};
  			};
  
-+			spi1: spi@fffcc000 {
-+				cs-gpio = <&pioB 3 0>,<&pioC 5 0>,<&pioC 4 0>;
-+				status = "okay";
-+
-+				display@0{
-+					compatible = "adafruit,yx240qv29", "ilitek,ili9341";
-+					reg = <0>;
-+					spi-max-frequency = <32000000>;
-+					dc-gpios = <&pioA 29 GPIO_ACTIVE_HIGH>;
-+					reset-gpios = <&pioA 28 GPIO_ACTIVE_HIGH>;
-+					rotation = <270>;
-+					backlight = <&backlight>;
-+				};
-+			};		
-+
- 			dbgu: serial@fffff200 {
- 				status = "okay";
- 			};
+@@ -105,9 +102,9 @@
  
  			pinctrl@fffff400 {
  				board {
@@ -111,7 +82,7 @@ index ce96345..ff022e2 100644
  					};
  				};
  			};
-@@ -136,53 +153,70 @@
+@@ -136,53 +133,100 @@
  			status = "okay";
  		};
  
@@ -141,6 +112,36 @@ index ce96345..ff022e2 100644
  		};
  	};
  
++	backlight: backlight {
++            compatible = "gpio-backlight";
++            gpios = <&pioA 26 GPIO_ACTIVE_HIGH>;
++			default-on;
++    };
++
++	spi1 {
++		compatible = "spi-gpio";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		num-chipselects = <1>;
++		cs-gpios = <&pioB 3 GPIO_ACTIVE_LOW>;
++		sck-gpios = <&pioB 2 GPIO_ACTIVE_HIGH>;
++		mosi-gpios = <&pioB 1 GPIO_ACTIVE_HIGH>;
++		miso-gpios = <&pioB 0 GPIO_ACTIVE_HIGH>;
++
++		display@0{
++			compatible = "adafruit,yx240qv29", "ilitek,ili9341";
++			status = "okay";
++			reg = <0>;
++			spi-max-frequency = <32000000>;
++			dc-gpios = <&pioA 29 GPIO_ACTIVE_HIGH>;
++			reset-gpios = <&pioA 28 GPIO_ACTIVE_HIGH>;
++			rotation = <270>;
++			backlight = <&backlight>;
++		};
++	};		
++
++
  	gpio_keys {
  		compatible = "gpio-keys";
  

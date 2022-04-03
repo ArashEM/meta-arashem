@@ -8,6 +8,7 @@ SRC_URI = "https://github.com/linux4microchip/linux/archive/refs/tags/linux4micr
            file://jffs2.cfg \ 
            file://kernel-config.cfg \
            file://spidev.cfg \ 
+           file://printk.cfg \ 
            file://bootconsole.cfg \
           "
 
